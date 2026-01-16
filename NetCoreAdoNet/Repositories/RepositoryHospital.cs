@@ -1,19 +1,19 @@
 ﻿using Microsoft.Data.SqlClient;
-using NetCoreAdoNet.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Data;
+using NetCoreAdoNet.Models;
 
 namespace NetCoreAdoNet.Repositories
 {
-    public class RepositoryDepartamentos
+    public class RepositoryHospital
     {
         private SqlConnection cn;
         private SqlCommand com;
         private SqlDataReader reader;
 
-        public RepositoryDepartamentos()
+        public RepositoryHospital()
         {
             string connectionString = @"Data Source=LOCALHOST\DEVELOPER;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Encrypt=True;Trust Server Certificate=True";
             this.cn = new SqlConnection(connectionString);
@@ -21,10 +21,10 @@ namespace NetCoreAdoNet.Repositories
             this.com.Connection = this.cn;
         }
 
-        public async Task<List<Departamento>> GetDepartamentosAsync()
+        public async Task<List<Hospital>> GetHospitalesAsync()
         {
-            List<Departamento> departamentos = new List<Departamento>();
-            string sql = "select * from DEPT";
+            List<Hospital> hospitales = new List<Hospital>();
+            string sql = "select * from HOSPITAL";
 
             this.com.CommandType = CommandType.Text;
             this.com.CommandText = sql;
@@ -33,49 +33,31 @@ namespace NetCoreAdoNet.Repositories
             this.reader = await this.com.ExecuteReaderAsync();
             while (await this.reader.ReadAsync())
             {
-                Departamento dept = new Departamento();
-                dept.IdDepartamento = int.Parse(this.reader["DEPT_NO"].ToString());
-                dept.Nombre = this.reader["DNOMBRE"].ToString();
-                dept.Localidad = this.reader["LOC"].ToString();
-                departamentos.Add(dept);
+                Hospital hos = new Hospital();
+                hos.IdHospital = int.Parse(this.reader["HOSPITAL_COD"].ToString());
+                hos.Nombre = this.reader["NOMBRE"].ToString();
+                hos.Direccion = this.reader["DIRECCION"].ToString();
+                hos.Telefono = this.reader["TELEFONO"].ToString();
+                hos.NumeroCamas = int.Parse(this.reader["NUM_CAMA"].ToString());
+
+                hospitales.Add(hos);
             }
 
+            await this.cn.CloseAsync();
             await this.reader.CloseAsync();
-            await this.cn.CloseAsync();
 
-            return departamentos;
+            return hospitales;
         }
 
-        public async Task CreateDepartamentoAsync(int id, string nombre, string localidad)
+        public async Task InsertHospitalAsync(int id, string nombre, string direccion, string telefono, int numCamas)
         {
-            string sql = "insert into DEPT values(@id, @nombre, @localidad)";
+            string sql = "insert into HOSPITAL values(@id, @nombre, @direccion, @telefono, @numcamas)";
 
-            SqlParameter paramId = new SqlParameter("@id", id);
-            SqlParameter paramNombre = new SqlParameter("@nombre", nombre);
-            SqlParameter paramLocalidad = new SqlParameter("@localidad", localidad);
-
-            this.com.Parameters.Add(paramId);
-            this.com.Parameters.Add(paramNombre);
-            this.com.Parameters.Add(paramLocalidad);
-
-            this.com.CommandType = CommandType.Text;
-            this.com.CommandText = sql;
-
-            await this.cn.OpenAsync();
-            await this.com.ExecuteNonQueryAsync();
-            await this.cn.CloseAsync();
-
-            this.com.Parameters.Clear();
-        }
-
-        public async Task UpdateDepartamentoAsync(int id, string nombre, string localidad)
-        {
-            string sql = "update DEPT set DNOMBRE = @nombre, LOC = @localidad where DEPT_NO = @id";
-
-            // Tenemos un método en command que nos permite añadir parametros sin crear objetos, siempre que sean de tipo primitivo.
             this.com.Parameters.AddWithValue("@id", id);
             this.com.Parameters.AddWithValue("@nombre", nombre);
-            this.com.Parameters.AddWithValue("@localidad", localidad);
+            this.com.Parameters.AddWithValue("@direccion", direccion);
+            this.com.Parameters.AddWithValue("@telefono", telefono);
+            this.com.Parameters.AddWithValue("@numcamas", numCamas);
 
             this.com.CommandType = CommandType.Text;
             this.com.CommandText = sql;
@@ -87,11 +69,17 @@ namespace NetCoreAdoNet.Repositories
             this.com.Parameters.Clear();
         }
 
-        public async Task DeleteDepartamentoAsync(int id)
+        public async Task UpdateHospitalAsync(int id, string nombre, string direccion, string telefono, int numCamas)
         {
-            string sql = "delete from DEPT where DEPT_NO = @id";
+            string sql = "update HOSPITAL set NOMBRE = @nombre, DIRECCION = @direccion, " +
+                "TELEFONO = @telefono, NUM_CAMA = @numcamas where HOSPITAL_COD = @id";
 
             this.com.Parameters.AddWithValue("@id", id);
+            this.com.Parameters.AddWithValue("@nombre", nombre);
+            this.com.Parameters.AddWithValue("@direccion", direccion);
+            this.com.Parameters.AddWithValue("@telefono", telefono);
+            this.com.Parameters.AddWithValue("@numcamas", numCamas);
+
             this.com.CommandType = CommandType.Text;
             this.com.CommandText = sql;
 
@@ -102,5 +90,20 @@ namespace NetCoreAdoNet.Repositories
             this.com.Parameters.Clear();
         }
 
+        public async Task DeleteHospitalAsync(int id)
+        {
+            string sql = "delete from HOSPITAL where HOSPITAL_COD = @id";
+
+            this.com.Parameters.AddWithValue("@id", id);
+
+            this.com.CommandType = CommandType.Text;
+            this.com.CommandText = sql;
+
+            await this.cn.OpenAsync();
+            await this.com.ExecuteNonQueryAsync();
+            await this.cn.CloseAsync();
+
+            this.com.Parameters.Clear();
+        }
     }
 }
