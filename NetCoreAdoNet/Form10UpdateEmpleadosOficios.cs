@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using NetCoreAdoNet.Models;
 using NetCoreAdoNet.Repositories;
 using System;
 using System.Collections.Generic;
@@ -41,7 +42,7 @@ namespace NetCoreAdoNet
             if (this.lstOficios.SelectedIndex != -1)
             {
                 string oficio = this.lstOficios.SelectedItem.ToString();
-                await this.CargarDatosSalarios(oficio);
+                await this.CargarDatosSalarios();
                 List<string> empleados = await this.repo.GetEmpleadosByOficioAsync(oficio);
                 this.lstEmpleados.Items.Clear();
 
@@ -62,7 +63,7 @@ namespace NetCoreAdoNet
                 int registros = await this.repo.UpdateSalarioEmpleados(oficio, incremento);
 
                 MessageBox.Show(registros.ToString() + " registro/s actualizado/s.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                await this.CargarDatosSalarios(oficio);
+                await this.CargarDatosSalarios();
             } else if (this.txtIncrementoSalario.Text == "")
             {
                 MessageBox.Show("Debes introducir un incremento", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -73,27 +74,21 @@ namespace NetCoreAdoNet
             }
         }
 
-        private async Task CargarDatosSalarios(string oficio)
+        private async Task CargarDatosSalarios()
         {
-            List<int> salarios = await this.repo.GetSalariosByOficioAsync(oficio);
-            int sumaTotal = 0;
-            double media;
-            int maximo = 0;
-
-            foreach (int sal in salarios)
+            int index = this.lstOficios.SelectedIndex;
+            if (index != -1)
             {
-                sumaTotal += sal;
-                if (sal > maximo)
-                {
-                    maximo = sal;
-                }
+                string oficio = this.lstOficios.SelectedItem.ToString();
+                DatosEmpleados data = await this.repo.GetDatosEmpleadosAsync(oficio);
+
+                this.lblSumaSalarial.Text = "Suma Total: " + data.SumaSalarial.ToString("C");
+                this.lblMediaSalarial.Text = "Salario Medio: " + data.MediaSalarial.ToString("C");
+                this.lblMaximoSalarial.Text = "Salario Máximo: " + data.MaximoSalario.ToString("C");
             }
 
-            media = sumaTotal / salarios.Count();
 
-            this.lblSumaSalarial.Text = "Suma Total: " + sumaTotal.ToString("C");
-            this.lblMediaSalarial.Text = "Salario Medio: " + media.ToString("C");
-            this.lblMaximoSalarial.Text = "Salario Máximo: " + maximo.ToString("C");
+
         }
     }
 }

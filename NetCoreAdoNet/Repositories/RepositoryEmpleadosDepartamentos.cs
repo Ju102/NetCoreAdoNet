@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Data;
+using NetCoreAdoNet.Models;
 namespace NetCoreAdoNet.Repositories
 {
     public class RepositoryEmpleadosDepartamentos
