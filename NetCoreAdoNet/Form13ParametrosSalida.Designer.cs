@@ -96,9 +96,9 @@
             // 
             // btnMostrarDatos
             // 
-            btnMostrarDatos.Location = new Point(63, 90);
+            btnMostrarDatos.Location = new Point(59, 86);
             btnMostrarDatos.Name = "btnMostrarDatos";
-            btnMostrarDatos.Size = new Size(86, 39);
+            btnMostrarDatos.Size = new Size(96, 31);
             btnMostrarDatos.TabIndex = 7;
             btnMostrarDatos.Text = "Mostrar datos";
             btnMostrarDatos.UseVisualStyleBackColor = true;
